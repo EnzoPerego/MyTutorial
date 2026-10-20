@@ -78,6 +78,8 @@ public static class BayBuilder
     [MenuItem("Fuga na Baía/Gerar tudo")]
     public static void GenerateAll()
     {
+        if (!Application.isBatchMode && !EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+
         var layout = new LevelLayout(File.ReadAllText(LayoutPath));
         List<string> errors = layout.Validate();
         if (errors.Count > 0) throw new Exception("Layout inválido:\n" + string.Join("\n", errors));
@@ -646,6 +648,13 @@ public static class BayBuilder
         }
         if (islands.GetUsedTilesCount() == 0) throw new Exception("Nenhum tile de ilha foi pintado.");
 
+        // O contorno do CompositeCollider2D é salvo na cena: precisa ser calculado agora,
+        // senão a cena vai com o colisor vazio e dá para atravessar as ilhas.
+        islands.GetComponent<TilemapCollider2D>().ProcessTilemapChanges();
+        var composite = islands.GetComponent<CompositeCollider2D>();
+        composite.GenerateGeometry();
+        if (composite.pathCount == 0) throw new Exception("O colisor das ilhas ficou vazio.");
+
         // Decoração das ilhas
         Transform decor = NewObject("Decoracao", root.transform).transform;
         Sprite[] palms = { KenneyTile(71), KenneyTile(71), KenneyTile(70), KenneyTile(72) };
@@ -733,8 +742,16 @@ public static class BayBuilder
 
     static Scene NewSceneFromTemplate(string path)
     {
-        if (File.Exists(path)) AssetDatabase.DeleteAsset(path);
-        if (!AssetDatabase.CopyAsset(TemplateScene, path)) throw new Exception("Não consegui copiar a cena modelo para " + path);
+        // Sobrescreve o conteúdo mantendo o .meta, para a cena não trocar de GUID a cada geração.
+        if (File.Exists(path))
+        {
+            File.Copy(TemplateScene, path, true);
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+        }
+        else if (!AssetDatabase.CopyAsset(TemplateScene, path))
+        {
+            throw new Exception("Não consegui copiar a cena modelo para " + path);
+        }
         return EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
     }
 

@@ -110,6 +110,74 @@ public class BaiaSmokeTests
         yield return null;
     }
 
+    // Maior ilha do mapa com água dos dois lados (abaixo e acima), para testar travessia.
+    static void IslandWithWaterAround(out RectInt island, out Vector2 below, out Vector2 above)
+    {
+        LevelLayout layout = GameMap.Instance.Layout;
+        NavGrid nav = GameMap.Instance.Nav;
+        island = default;
+        below = above = Vector2.zero;
+        int bestArea = 0;
+        foreach (RectInt r in layout.FindIslands())
+        {
+            int cx = r.xMin + r.width / 2;
+            var b = new Vector2Int(cx, r.yMin - 2);
+            var a = new Vector2Int(cx, r.yMax + 1);
+            if (r.width * r.height > bestArea && nav.IsWalkable(b) && nav.IsWalkable(a))
+            {
+                bestArea = r.width * r.height;
+                island = r;
+                below = LevelLayout.CellCenter(b);
+                above = LevelLayout.CellCenter(a);
+            }
+        }
+        Assert.Greater(bestArea, 0, "nenhuma ilha com água acima e abaixo");
+    }
+
+    static bool Inside(RectInt island, Vector2 p, float margin)
+    {
+        return p.x > island.xMin + margin && p.x < island.xMax - margin && p.y > island.yMin + margin && p.y < island.yMax - margin;
+    }
+
+    [UnityTest]
+    public IEnumerator SurferCannotCrossIslands()
+    {
+        yield return LoadGame();
+        Assert.IsNotNull(Physics2D.OverlapPoint(LevelLayout.CellCenter(GameMap.Instance.Layout.FindIslands()[0].position), GameMap.Instance.obstacleMask),
+            "as ilhas não têm colisor");
+
+        IslandWithWaterAround(out RectInt island, out Vector2 below, out _);
+        Player.GetComponent<PlayerMovement>().enabled = false;
+        var body = Player.GetComponent<Rigidbody2D>();
+        body.position = below;
+
+        for (int i = 0; i < 100; i++)
+        {
+            body.linearVelocity = Vector2.up * 10f;
+            yield return new WaitForFixedUpdate();
+            Assert.IsFalse(Inside(island, body.position, 0.25f), $"o surfista entrou na ilha em {body.position}");
+        }
+        Assert.Less(body.position.y, island.yMin + 0.25f, "o surfista atravessou a ilha");
+    }
+
+    [UnityTest]
+    public IEnumerator PirateGoesAroundIslands()
+    {
+        yield return LoadGame();
+        IslandWithWaterAround(out RectInt island, out Vector2 below, out Vector2 above);
+        Player.GetComponent<PlayerMovement>().enabled = false;
+        Player.GetComponent<Rigidbody2D>().position = above;
+        var chaser = Object.FindFirstObjectByType<EnemyChaser>();
+        chaser.GetComponent<Rigidbody2D>().position = below;
+        chaser.speedMultiplier = 2f;
+
+        for (int i = 0; i < 200; i++)
+        {
+            yield return new WaitForFixedUpdate();
+            Assert.IsFalse(Inside(island, chaser.transform.position, 0.25f), $"o pirata passou por cima da ilha em {chaser.transform.position}");
+        }
+    }
+
     [UnityTest]
     public IEnumerator SharkBiteCostsTime()
     {
