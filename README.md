@@ -1,37 +1,57 @@
-# Corrida dos Triângulos
+# Fuga na Baía
 
-Jogo 2D de arena contra o relógio: colete os 7 triângulos antes que o tempo acabe, fugindo de um inimigo que persegue você pelo mapa.
+Jogo 2D de sobrevivência com tema de piratas e surf: o relógio é a sua vida. Pegue tesouros para ganhar tempo e fuja dos piratas pelo maior tempo possível.
 
-**Jogar no navegador:** [LINK_DO_ITCH](https://erperego.itch.io/mytutorial-jogo001)
+**Jogar no navegador:** [erperego.itch.io/mytutorial-jogo001](https://erperego.itch.io/mytutorial-jogo001)
 
 ## Como jogar
 
-- **Objetivo:** coletar os **7 triângulos** antes que o cronômetro chegue a zero.
-- Você começa com **10 segundos**.
-- Cada triângulo coletado dá **+1 segundo**.
-- Se o inimigo vermelho encostar em você, você perde **5 segundos** e fica **invencível por 2 segundos**, piscando.
-- Segure **Shift** para correr **1,8× mais rápido**. A barra de stamina esvazia em cerca de 3 segundos de corrida e recarrega quando você para de correr. Se ela zerar, você só volta a correr depois de recuperar 20% da barra.
-- **Vitória:** coletar os 7 triângulos. A tela final mostra quanto tempo sobrou.
-- **Derrota:** o cronômetro chegar a zero.
+- O relógio começa em **30 s** e desce o tempo todo. Quando zera, a partida acaba.
+- A pontuação é o **tempo sobrevivido**. O melhor tempo fica salvo como recorde.
+- O jogo é dividido em **ondas**. Cada onda espalha baús, moedas, ampulhetas e boias pela baía. Pegue **todos os baús** da onda para começar a próxima e ganhar **+5 s**.
+- A cada onda aparecem mais baús e mais navios piratas, e os perseguidores ficam mais rápidos.
+- A seta amarela em volta do surfista aponta para o baú mais próximo.
+- **Remada forte:** segure Shift para ir 1,8× mais rápido enquanto houver stamina. Se a barra zerar, você só volta a remar forte depois de recuperar 20%.
+
+| Item | Efeito |
+|---|---|
+| Baú | +4 s |
+| Moeda | +1 s |
+| Ampulheta | +5 s |
+| Boia | Escudo que absorve o próximo golpe |
+
+| Perigo | Efeito |
+|---|---|
+| Navio pirata (vela preta) | Persegue você contornando as ilhas. Encostar tira **5 s**. |
+| Navio canhoneiro (vela vermelha) | Ancorado. Atira quando você chega perto; o canhão pisca vermelho antes do tiro. A bala tira **3 s**. |
+| Torres do forte (Ilha da Caveira) | Atiram por cima da ilha. A bala tira **3 s**. |
+| Tubarão | Patrulha o recife. A mordida tira **3 s**. |
+
+Depois de um golpe, o surfista fica 2 s invencível, piscando.
 
 ## Controles
 
-| Ação | Teclado |
+| Ação | Teclado | Controle |
 |---|---|---|
-| Mover | WASD ou setas |
-| Correr | Shift esquerdo |
-| Confirmar nos menus | Enter ou clique do mouse |
+| Mover | WASD ou setas | Analógico esquerdo |
+| Remada forte | Shift esquerdo | X |
+| Pausar | ESC ou P | Start |
+| Confirmar nos menus | Enter ou clique do mouse | A |
 
 ## Funcionalidades implementadas
 
 - **Mecânica de tempo**
-  - Cronômetro regressivo no formato MM:SS.
-  - Tempo restante exibido ao final ("Você venceu! Sobraram MM:SS" ou "Tempo esgotado!").
-  - O tempo é a mecânica central: +1 s por triângulo, −5 s por impacto do inimigo, derrota quando zera.
-- **Inimigo perseguidor com impacto:** o inimigo segue o jogador o tempo todo. O contato tira 5 s e ativa 2 s de invencibilidade com o personagem piscando.
-- **UI:** cronômetro, contador de triângulos ("Triângulos: x/7"), barra de stamina e painel de fim de jogo com os botões "Reiniciar" e "Menu Inicial".
-- **Áudio:** música de fundo em loop, som de moeda ao coletar um triângulo e som de lâmina ao ser atingido. A música para quando a partida termina.
-- **Suporte a joystick:** movimento pelo analógico esquerdo, corrida no botão X e confirmação com A nos menus.
+  - Relógio de vida regressivo no formato MM:SS, que pisca em vermelho abaixo de 10 s.
+  - O tempo é a mecânica central: itens somam tempo, golpes tiram e completar uma onda dá bônus.
+  - Tempo sobrevivido no HUD e na tela final, com recorde salvo entre partidas.
+- **Inimigos com impacto**
+  - Navio perseguidor que contorna ilhas usando um campo de fluxo (BFS) sobre o mapa.
+  - Navios canhoneiros e torres que disparam com aviso visual, e tubarões que patrulham rotas fixas.
+- **Ondas com dificuldade crescente:** mais baús, mais piratas e piratas mais rápidos.
+- **UI:** relógio, onda, baús da onda, tempo sobrevivido, recorde, barra de stamina, bússola, textos "+4s"/"-5s", aviso de onda, pausa, tela final e menu com "Como jogar".
+- **Áudio:** música em loop e efeitos para moeda, baú, ampulheta, boia, golpe, canhão, explosão, respingo, nova onda, fim de jogo e cliques.
+- **Suporte a controle:** movimento, remada forte, pausa e navegação nos menus.
+- **Sem dead-end ou softlock:** a partida sempre termina, porque o relógio só desce. A pausa e a tela final têm Reiniciar e Menu. Testes automáticos garantem que toda a água do mapa é alcançável.
 
 ## Como rodar o projeto
 
@@ -43,39 +63,86 @@ Jogo 2D de arena contra o relógio: colete os 7 triângulos antes que o tempo ac
 3. No Unity Hub, clique em **Add → Add project from disk** e selecione a pasta clonada.
 4. Abra a cena `Assets/Scenes/MainMenu.unity` e aperte **Play**.
 
+### Mudar o mapa
+
+As cenas e os prefabs são gerados por `Assets/Editor/BayBuilder.cs` a partir do arquivo de texto `Assets/Level/baia.txt`. Para mudar o mapa, edite o texto e use o menu **Fuga na Baía → Gerar tudo** no Unity. Ajustes feitos à mão nas cenas são sobrescritos quando você gera de novo.
+
+| Caractere | Significado |
+|---|---|
+| `.` | Água |
+| `#` | Ilha (retangular; com 4×4 ou mais ganha grama no centro) |
+| `p` | Palmeira (sobre uma ilha) |
+| `w` | Muralha do forte (sobre uma ilha) |
+| `T` | Torre de canhão (sobre uma ilha) |
+| `r` | Pedra na água |
+| `C` | Navio canhoneiro |
+| `S` | Início do surfista |
+| `P` | Entrada de navio pirata |
+| `1`–`9` | Pontas de uma rota de tubarão (cada dígito aparece 2 vezes) |
+
+### Testes e build
+
+- **Testes:** *Window → General → Test Runner*, nas abas EditMode e PlayMode. Os testes verificam regras, navegação, se todo o mapa é alcançável, as ondas, os perigos, a pausa e o fim de jogo.
+- **Build WebGL:** menu **Fuga na Baía → Build WebGL**. A saída vai para `WebBuild/FugaNaBaia`, sem compressão, para rodar direto no itch.io.
+
 ## Estrutura do projeto
 
 ```
 Assets/
-├── Scenes/
-│   ├── MainMenu.unity      menu inicial
-│   └── SampleScene.unity   fase do jogo
-├── Settings/               configurações do URP e do Input System
-├── Player.prefab           jogador
-├── Triangle.prefab         triângulo coletável
-├── *.cs                    scripts (abaixo)
-└── *.mp3, *.ttf            áudios e fonte
+├── Art/          Kenney (tiles, navios, efeitos), Custom (sprites próprios), Fonts, Tiles
+├── Audio/        Music e Sfx
+├── Editor/       BayBuilder.cs (gera tiles, fontes, prefabs, cenas e o build)
+├── Level/        baia.txt (layout do mapa)
+├── Prefabs/      gerados pelo BayBuilder
+├── Scenes/       MainMenu.unity e Baia.unity
+├── Scripts/      scripts do jogo (assembly FugaNaBaia)
+└── Tests/        EditMode e PlayMode
+Tools/            gen_art.py e gen_sfx.py (geram os sprites e sons próprios)
+docs/             documento de design
 ```
 
 | Script | O que faz |
 |---|---|
-| `GameController.cs` | Guarda o estado da partida: triângulos coletados, vitória e derrota. |
-| `GameTimer.cs` | Cronômetro regressivo; soma ou subtrai segundos do tempo restante. |
-| `PlayerMovement.cs` | Movimento, corrida com stamina, coleta de triângulos e dano do inimigo com invencibilidade. |
-| `EnemyChaser.cs` | Faz o inimigo seguir o jogador. |
-| `UIManager.cs` | Esconde o HUD e mostra o painel de fim de jogo com o tempo restante. |
-| `ScoreUI.cs` | Atualiza o contador de triângulos. |
-| `StaminaBar.cs` | Atualiza a barra de stamina. |
-| `AudioManager.cs` | Toca o som de impacto e para a música no fim da partida. |
-| `MenuAction.cs` | Ações dos botões: iniciar ou reiniciar a partida e voltar ao menu inicial. |
+| `GameController.cs` | Estado da partida: onda atual, baús da onda e fim de jogo. |
+| `GameRules.cs` | Todos os números do jogo (tempos, tabela das ondas). |
+| `GameTimer.cs` | Relógio de vida, tempo sobrevivido e formatação MM:SS. |
+| `WaveSpawner.cs` | Começa as ondas, espalha itens e coloca/acelera os piratas. |
+| `LevelLayout.cs` | Lê o mapa em texto: ilhas, pedras, rotas e pontos especiais. |
+| `NavGrid.cs` | Grade de navegação e campo de fluxo (BFS) dos piratas. |
+| `GameMap.cs` | Mantém o layout e o campo de fluxo atualizados durante o jogo. |
+| `PlayerMovement.cs` | Surfista: movimento, remada forte, golpes, escudo e invencibilidade. |
+| `EnemyChaser.cs` | Navio pirata que persegue o surfista contornando ilhas. |
+| `CannonShooter.cs` | Canhão de navio ou torre: mira, aviso e tiro. |
+| `Cannonball.cs` | Bala de canhão: explode em obstáculos ou cai na água. |
+| `SharkPatrol.cs` | Tubarão que vai e volta entre dois pontos. |
+| `Hazard.cs` | Marca o que tira tempo do surfista ao encostar. |
+| `Pickup.cs` | Baú, moeda, ampulheta e boia. |
+| `Compass.cs` | Seta que aponta para o baú mais próximo. |
+| `CameraFollow.cs` | Câmera que segue o surfista, presa ao mapa, com tremida nos golpes. |
+| `UIManager.cs` | Tela de fim de jogo com tempo, onda e recorde. |
+| `ScoreUI.cs` | Onda, baús e recorde no HUD. |
+| `StaminaBar.cs` | Barra de stamina que muda de cor. |
+| `WaveBanner.cs` | Aviso "Onda N!" no começo de cada onda. |
+| `TimePopups.cs` / `FloatingText.cs` | Textos "+4s"/"-5s" que sobem e somem. |
+| `PauseMenu.cs` | Pausa com ESC, P ou Start. |
+| `BestScore.cs` | Salva e lê o recorde. |
+| `MenuAction.cs` | Botões dos menus: jogar, reiniciar, voltar ao menu, "Como jogar". |
+| `AudioManager.cs` | Música e efeitos sonoros. |
+| `WakeEmitter.cs` | Rastro de espuma atrás de quem se move na água. |
+| `OceanDecor.cs` | Anima as ondas decorativas. |
+| `SpriteFlipbook.cs` | Efeitos curtos (explosão, respingo, fumaça). |
+| `MenuCameraPan.cs` | Passeio da câmera pela baía no menu. |
 
 ## Créditos
 
-- Música "Bit Bound Run" (`bitbound-run.mp3`): gerada com ElevenLabs.
-- Efeito sonoro de lâmina (`ElevenLabs_A_cheerful_voice_ringing_out__'Look_at_my_blade!'_followed_by_a_distinct_ringing_blade_sound.mp3`): gerado com ElevenLabs.
-- Som de moeda (`chieuk-coin-257878.mp3`).
-- Fonte AldotheApache (`AldotheApache.ttf`).
+- **Arte:** [Kenney Pirate Pack](https://kenney.nl/assets/pirate-pack) (CC0): ilhas, navios, forte, pedras, palmeiras, balas e explosões.
+- **Sprites próprios** (surfista, tubarão, baú, moeda, ampulheta, boia, bússola e interface): desenhados por código para o projeto (`Tools/gen_art.py`).
+- **Fontes:** Pirata One (Rodrigo Fuenzalida e Nicolas Massi) e Lilita One (Juan Montoreano), ambas sob a SIL Open Font License.
+- **Música** "Bit Bound Run" (`bitbound-run.mp3`): gerada com ElevenLabs.
+- **Efeito sonoro de lâmina** (`elevenlabs-blade.mp3`): gerado com ElevenLabs.
+- **Som de moeda** (`chieuk-coin-257878.mp3`).
+- **Demais efeitos sonoros:** sintetizados para o projeto (`Tools/gen_sfx.py`).
 
 ---
 
-Projeto individual da disciplina Jogos Digitais (Insper, 2025.2), feito por Enzo Rios Perego.
+Projeto individual da disciplina Jogos Digitais (Insper, 2026.2), feito por Enzo Rios Perego.
