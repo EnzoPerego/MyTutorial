@@ -35,7 +35,7 @@ public class WaveBanner : MonoBehaviour
     void Update()
     {
         float t = Time.time - shownAt;
-        if (t > holdTime + fadeTime)
+        if (PauseMenu.paused || t > holdTime + fadeTime)
         {
             group.alpha = 0f;
             return;

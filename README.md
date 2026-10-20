@@ -83,7 +83,7 @@ As cenas e os prefabs são gerados por `Assets/Editor/BayBuilder.cs` a partir do
 ### Testes e build
 
 - **Testes:** *Window → General → Test Runner*, nas abas EditMode e PlayMode. Os testes verificam regras, navegação, se todo o mapa é alcançável, as ondas, os perigos, a pausa e o fim de jogo.
-- **Build WebGL:** menu **Fuga na Baía → Build WebGL**. A saída vai para `WebBuild/FugaNaBaia`, sem compressão, para rodar direto no itch.io.
+- **Build WebGL:** menu **Fuga na Baía → Build WebGL**. A saída vai para `WebBuild/FugaNaBaia`, sem compressão, para rodar direto no itch.io. O jogo é feito para **600×480** e usa o modelo de página `Assets/WebGLTemplates/FugaNaBaia`, que mantém a proporção 5:4 e mostra uma barra de carregamento. No itch, configure a janela (viewport) com 600×480.
 
 ## Estrutura do projeto
 

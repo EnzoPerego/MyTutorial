@@ -266,12 +266,12 @@ public class BaiaSmokeTests
         Directory.CreateDirectory(dir);
 
         Camera cam = Camera.main;
-        var rt = new RenderTexture(1280, 720, 24);
+        var rt = new RenderTexture(600, 480, 24);
         cam.targetTexture = rt;
         cam.Render();
         RenderTexture.active = rt;
-        var tex = new Texture2D(1280, 720, TextureFormat.RGB24, false);
-        tex.ReadPixels(new Rect(0, 0, 1280, 720), 0, 0);
+        var tex = new Texture2D(600, 480, TextureFormat.RGB24, false);
+        tex.ReadPixels(new Rect(0, 0, 600, 480), 0, 0);
         tex.Apply();
         File.WriteAllBytes(Path.Combine(dir, file), tex.EncodeToPNG());
         RenderTexture.active = null;

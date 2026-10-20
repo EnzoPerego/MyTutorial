@@ -31,6 +31,8 @@ public static class BayBuilder
     public const string MenuScenePath = "Assets/Scenes/MainMenu.unity";
     public const string GameScenePath = "Assets/Scenes/Baia.unity";
     const string WebBuildPath = "WebBuild/FugaNaBaia";
+    const int WebWidth = 600;
+    const int WebHeight = 480;
 
     const int UILayer = 5;
     const int ObstacleLayer = 8;
@@ -181,8 +183,9 @@ public static class BayBuilder
         };
         PlayerSettings.productName = "Fuga na Baía";
         PlayerSettings.companyName = "Enzo Rios Perego";
-        PlayerSettings.defaultWebScreenWidth = 1280;
-        PlayerSettings.defaultWebScreenHeight = 720;
+        PlayerSettings.defaultWebScreenWidth = WebWidth;
+        PlayerSettings.defaultWebScreenHeight = WebHeight;
+        PlayerSettings.WebGL.template = "PROJECT:FugaNaBaia";
         PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Disabled;
     }
 
@@ -833,7 +836,7 @@ public static class BayBuilder
         var follow = cam.gameObject.AddComponent<CameraFollow>();
         follow.target = player.transform;
         follow.bounds = new Rect(0f, 0f, layout.width, layout.height);
-        float halfW = cam.orthographicSize * 16f / 9f;
+        float halfW = cam.orthographicSize * WebWidth / (float)WebHeight;
         cam.transform.position = new Vector3(
             Mathf.Clamp(start.x, halfW, layout.width - halfW),
             Mathf.Clamp(start.y, cam.orthographicSize, layout.height - cam.orthographicSize), -10f);
@@ -973,7 +976,7 @@ public static class BayBuilder
         var scaler = go.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920f, 1080f);
-        scaler.matchWidthOrHeight = 0.5f;
+        scaler.matchWidthOrHeight = 1f;
         return canvas;
     }
 
@@ -1020,7 +1023,7 @@ public static class BayBuilder
 
         RectTransform right = UI("Pontuacao", hud, new Vector2(1f, 1f), new Vector2(-184f, -100f), new Vector2(320f, 160f));
         Img(right, Custom("ui_plaque"), Color.white, 0.6f);
-        TextUI("Rotulo", right, new Vector2(0.5f, 0.5f), new Vector2(0f, 52f), new Vector2(280f, 40f), "Sobrevivido", uiFont, uiOutline, 30f, Cream);
+        TextUI("Rotulo", right, new Vector2(0.5f, 0.5f), new Vector2(0f, 52f), new Vector2(280f, 40f), "Sobrevivido", uiFont, uiOutline, 34f, Cream);
         TextMeshProUGUI survivedText = TextUI("Sobrevivido", right, new Vector2(0.5f, 0.5f), new Vector2(0f, 8f), new Vector2(280f, 64f),
             "00:00", uiFont, uiOutline, 58f, Cream);
         IconText(right, Custom("icon_trophy"), new Vector2(60f, -48f), 44f, out TextMeshProUGUI recordText, 36f);
@@ -1033,7 +1036,7 @@ public static class BayBuilder
         // Barra de stamina
         RectTransform staminaPlaque = UI("PlacaStamina", hud, new Vector2(0.5f, 0f), new Vector2(0f, 70f), new Vector2(600f, 116f));
         Img(staminaPlaque, Custom("ui_plaque"), Color.white, 0.6f);
-        TextUI("RotuloRemada", staminaPlaque, new Vector2(0.5f, 0.5f), new Vector2(0f, 26f), new Vector2(560f, 40f), "Remada forte (Shift)", uiFont, uiOutline, 30f, Cream);
+        TextUI("RotuloRemada", staminaPlaque, new Vector2(0.5f, 0.5f), new Vector2(0f, 26f), new Vector2(560f, 40f), "Remada forte (Shift)", uiFont, uiOutline, 34f, Cream);
         RectTransform bar = UI("Stamina", staminaPlaque, new Vector2(0.5f, 0.5f), new Vector2(0f, -20f), new Vector2(520f, 40f));
         Img(Stretch("Fundo", bar), Custom("ui_bar_bg"), Color.white, 0.5f);
         RectTransform fillArea = Stretch("Area", bar, 6f);
@@ -1049,7 +1052,7 @@ public static class BayBuilder
         slider.navigation = new Navigation { mode = Navigation.Mode.None };
         bar.gameObject.AddComponent<StaminaBar>().fill = fillImg;
 
-        TextUI("DicaPausa", hud, new Vector2(1f, 0f), new Vector2(-150f, 40f), new Vector2(260f, 40f), "ESC: pausar", uiFont, uiOutline, 28f,
+        TextUI("DicaPausa", hud, new Vector2(1f, 0f), new Vector2(-150f, 40f), new Vector2(260f, 40f), "ESC: pausar", uiFont, uiOutline, 32f,
             new Color(1f, 1f, 1f, 0.8f));
 
         var timer = systems.AddComponent<GameTimer>();
@@ -1115,7 +1118,7 @@ public static class BayBuilder
         menu.recordText = TextUI("Recorde", c, new Vector2(0.5f, 0.5f), new Vector2(0f, -300f), new Vector2(1200f, 60f), "",
             uiFont, uiOutline, 42f, Gold);
         TextUI("Creditos", c, new Vector2(0.5f, 0f), new Vector2(0f, 40f), new Vector2(1600f, 50f),
-            "Enzo Rios Perego · Jogos Digitais · Insper", uiFont, uiOutline, 30f, Cream);
+            "Enzo Rios Perego · Jogos Digitais · Insper", uiFont, uiOutline, 34f, Cream);
 
         RectTransform panel = Overlay(c, "ComoJogar", new Vector2(1240f, 860f));
         TextUI("Titulo", panel, new Vector2(0.5f, 0.5f), new Vector2(0f, 340f), new Vector2(1000f, 130f), "Como jogar", titleFont, null, 100f, Ink);
@@ -1147,11 +1150,11 @@ public static class BayBuilder
         Directory.CreateDirectory(outDir);
 
         EditorSceneManager.OpenScene(MenuScenePath, OpenSceneMode.Single);
-        Render(UnityEngine.Object.FindFirstObjectByType<Camera>(), Path.Combine(outDir, "menu.png"), 1280, 720, null, null);
+        Render(UnityEngine.Object.FindFirstObjectByType<Camera>(), Path.Combine(outDir, "menu.png"), WebWidth, WebHeight, null, null);
 
         EditorSceneManager.OpenScene(GameScenePath, OpenSceneMode.Single);
         Camera cam = UnityEngine.Object.FindFirstObjectByType<Camera>();
-        Render(cam, Path.Combine(outDir, "jogo_inicio.png"), 1280, 720, null, null);
+        Render(cam, Path.Combine(outDir, "jogo_inicio.png"), WebWidth, WebHeight, null, null);
 
         var layout = new LevelLayout(File.ReadAllText(LayoutPath));
         foreach (Canvas canvas in UnityEngine.Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None)) canvas.gameObject.SetActive(false);

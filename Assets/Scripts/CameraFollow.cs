@@ -20,6 +20,11 @@ public class CameraFollow : MonoBehaviour
         cam = GetComponent<Camera>();
     }
 
+    void Start()
+    {
+        if (target != null) transform.position = Clamp(target.position);
+    }
+
     void OnDestroy()
     {
         if (instance == this) instance = null;
